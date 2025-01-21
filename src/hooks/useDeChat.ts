@@ -12,6 +12,7 @@ export function useDeChat() {
     abi: DeChatABI.abi,
     functionName: 'getUserConversations',
     args: [address],
+    enabled: !!address,
   })
 
   const { data: messages, refetch: refetchMessages } = useContractRead({
@@ -19,15 +20,16 @@ export function useDeChat() {
     abi: DeChatABI.abi,
     functionName: 'getUserMessages',
     args: [address],
+    enabled: !!address,
   })
 
-  const { writeAsync: write } = useContractWrite({
+  const { writeAsync: sendMessage } = useContractWrite({
     address: CONTRACT_ADDRESS as `0x${string}`,
     abi: DeChatABI.abi,
     functionName: 'sendMessage',
   })
 
-  const { writeAsync: writeEth } = useContractWrite({
+  const { writeAsync: sendEthWithMessage } = useContractWrite({
     address: CONTRACT_ADDRESS as `0x${string}`,
     abi: DeChatABI.abi,
     functionName: 'sendEthWithMessage',
@@ -35,9 +37,13 @@ export function useDeChat() {
 
   const sendTextMessage = async (recipient: string, content: string, isImage: boolean = false) => {
     try {
-      const tx = await write({
+      if (!address) throw new Error('Wallet not connected')
+      if (!recipient) throw new Error('Recipient address required')
+      
+      const tx = await sendMessage({
         args: [recipient, content, isImage],
       })
+      
       await tx.wait()
       await refetchMessages()
       await refetchConversations()
@@ -49,10 +55,14 @@ export function useDeChat() {
 
   const sendEthMessage = async (recipient: string, content: string, amount: string) => {
     try {
-      const tx = await writeEth({
+      if (!address) throw new Error('Wallet not connected')
+      if (!recipient) throw new Error('Recipient address required')
+      
+      const tx = await sendEthWithMessage({
         args: [recipient, content],
         value: parseEther(amount),
       })
+      
       await tx.wait()
       await refetchMessages()
       await refetchConversations()
