@@ -101,6 +101,16 @@ export function ChatWindow({ recipientAddress, messages, onSendMessage, onSendEt
     }
   };
 
+  const formatEthAmount = (amount: string) => {
+    try {
+      const ethValue = formatEther(BigInt(amount))
+      return Number(ethValue).toFixed(4)
+    } catch (error) {
+      console.error('Error formatting ETH amount:', error)
+      return '0'
+    }
+  }
+
   if (!recipientAddress) {
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -149,7 +159,7 @@ export function ChatWindow({ recipientAddress, messages, onSendMessage, onSendEt
                   </div>
                   <div className="flex flex-col">
                     <p className="text-sm font-medium">
-                      Sent {message.ethAmount ? Number(formatEther(BigInt(message.ethAmount))).toFixed(4) : '0'} ETH
+                      Sent {message.ethAmount ? formatEthAmount(message.ethAmount) : '0'} ETH
                     </p>
                     <p className="text-xs opacity-70">{message.content}</p>
                   </div>
