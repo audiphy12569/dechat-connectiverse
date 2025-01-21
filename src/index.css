@@ -77,3 +77,16 @@
 .message-bubble img {
   @apply max-w-full h-auto max-h-[300px] object-contain rounded-lg;
 }
+
+/* Add new ETH amount animations */
+.eth-amount-container {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+.eth-amount-container:hover .eth-icon {
+  @apply scale-110 rotate-12;
+}
+
+.eth-amount-container:hover .eth-amount {
+  @apply translate-x-1;
+}
