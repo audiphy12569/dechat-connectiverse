@@ -153,14 +153,16 @@ export function ChatWindow({ recipientAddress, messages, onSendMessage, onSendEt
                   loading="lazy"
                 />
               ) : message.type === 'eth' ? (
-                <div className="flex items-center space-x-2">
-                  <div className="flex items-center bg-primary/10 rounded-full p-1">
-                    <DollarSign className="h-4 w-4 text-primary" />
+                <div className="flex items-center space-x-2 group">
+                  <div className="flex items-center bg-primary/10 rounded-full p-1.5 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12">
+                    <DollarSign className="h-4 w-4 text-primary transition-colors duration-300 group-hover:text-primary/80" />
                   </div>
                   <div className="flex flex-col">
-                    <p className="text-sm font-medium">
-                      Sent {message.ethAmount ? formatEthAmount(message.ethAmount) : '0'} ETH
-                    </p>
+                    <div className="flex items-center space-x-1">
+                      <p className="text-sm font-medium transition-all duration-300 group-hover:translate-x-0.5">
+                        Sent {message.ethAmount ? formatEthAmount(message.ethAmount) : '0'} ETH
+                      </p>
+                    </div>
                     <p className="text-xs opacity-70">{message.content}</p>
                   </div>
                 </div>
