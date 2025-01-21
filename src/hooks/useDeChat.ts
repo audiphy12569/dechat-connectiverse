@@ -13,6 +13,7 @@ export function useDeChat() {
     abi: DeChatABI.abi,
     functionName: 'getUserConversations',
     args: address ? [address] : undefined,
+    watch: true, // This will make it update automatically when new messages arrive
   })
 
   const { data: messages, refetch: refetchMessages } = useContractRead({
@@ -20,6 +21,7 @@ export function useDeChat() {
     abi: DeChatABI.abi,
     functionName: 'getUserMessages',
     args: address ? [address] : undefined,
+    watch: true, // This will make it update automatically when new messages arrive
   })
 
   const { writeContract: sendMessageContract } = useContractWrite()
@@ -29,9 +31,8 @@ export function useDeChat() {
     try {
       if (!address) throw new Error('Wallet not connected')
       if (!recipient) throw new Error('Recipient address required')
-      if (!sendMessageContract) throw new Error('Contract write not ready')
       
-      await sendMessageContract({
+      const result = await sendMessageContract({
         abi: DeChatABI.abi,
         address: CONTRACT_ADDRESS as `0x${string}`,
         functionName: 'sendMessage',
@@ -39,9 +40,14 @@ export function useDeChat() {
         chain: config.chains[0],
         account: address,
       })
+
+      // Wait for the transaction to be mined
+      await result.wait()
       
-      await refetchMessages()
-      await refetchConversations()
+      // Refetch the data
+      await Promise.all([refetchMessages(), refetchConversations()])
+      
+      return result
     } catch (error) {
       console.error('Error sending message:', error)
       throw error
@@ -52,9 +58,8 @@ export function useDeChat() {
     try {
       if (!address) throw new Error('Wallet not connected')
       if (!recipient) throw new Error('Recipient address required')
-      if (!sendEthMessageContract) throw new Error('Contract write not ready')
       
-      await sendEthMessageContract({
+      const result = await sendEthMessageContract({
         abi: DeChatABI.abi,
         address: CONTRACT_ADDRESS as `0x${string}`,
         functionName: 'sendEthWithMessage',
@@ -63,9 +68,14 @@ export function useDeChat() {
         chain: config.chains[0],
         account: address,
       })
+
+      // Wait for the transaction to be mined
+      await result.wait()
       
-      await refetchMessages()
-      await refetchConversations()
+      // Refetch the data
+      await Promise.all([refetchMessages(), refetchConversations()])
+      
+      return result
     } catch (error) {
       console.error('Error sending ETH message:', error)
       throw error
