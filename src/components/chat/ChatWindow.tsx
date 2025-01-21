@@ -7,6 +7,7 @@ import { truncateAddress } from "@/lib/utils"
 import { uploadToPinata } from "@/lib/ipfs"
 import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { formatEther } from 'viem'
 
 interface Message {
   sender: string;
@@ -113,10 +114,10 @@ export function ChatWindow({ recipientAddress, messages, onSendMessage, onSendEt
       <div className="border-b p-4 flex items-center space-x-4">
         <Avatar>
           <AvatarImage src={`https://avatar.vercel.sh/${recipientAddress}.png`} />
-          <AvatarFallback>{recipientAddress.slice(2, 4)}</AvatarFallback>
+          <AvatarFallback>{recipientAddress?.slice(2, 4)}</AvatarFallback>
         </Avatar>
         <div>
-          <p className="font-medium">{truncateAddress(recipientAddress)}</p>
+          <p className="font-medium">{truncateAddress(recipientAddress || '')}</p>
         </div>
       </div>
       <div className="flex-1 overflow-auto p-4 space-y-4">
@@ -138,16 +139,18 @@ export function ChatWindow({ recipientAddress, messages, onSendMessage, onSendEt
                 <img 
                   src={message.content} 
                   alt="Sent image" 
-                  className="max-w-full h-auto max-h-[300px] rounded-lg object-contain"
+                  className="max-w-full h-auto max-h-[300px] object-contain rounded-lg"
                   loading="lazy"
                 />
               ) : message.type === 'eth' ? (
                 <div className="flex items-center space-x-2">
-                  <div className="flex items-center bg-whatsapp-primary/10 rounded-full p-1">
-                    <DollarSign className="h-4 w-4 text-whatsapp-primary" />
+                  <div className="flex items-center bg-primary/10 rounded-full p-1">
+                    <DollarSign className="h-4 w-4 text-primary" />
                   </div>
                   <div className="flex flex-col">
-                    <p className="text-sm font-medium">Sent {message.ethAmount} ETH</p>
+                    <p className="text-sm font-medium">
+                      Sent {message.ethAmount ? Number(formatEther(BigInt(message.ethAmount))).toFixed(4) : '0'} ETH
+                    </p>
                     <p className="text-xs opacity-70">{message.content}</p>
                   </div>
                 </div>
