@@ -23,7 +23,9 @@ export function useDeChat() {
     abi: DeChatABI.abi,
     functionName: 'getUserConversations',
     args: address ? [address] : undefined,
-    enabled: !!address,
+    query: {
+      enabled: !!address,
+    },
   })
 
   const { data: messages, refetch: refetchMessages } = useContractRead({
@@ -31,11 +33,13 @@ export function useDeChat() {
     abi: DeChatABI.abi,
     functionName: 'getUserMessages',
     args: address ? [address] : undefined,
-    enabled: !!address,
+    query: {
+      enabled: !!address,
+    },
   })
 
-  const { writeContract: sendMessageContract } = useContractWrite()
-  const { writeContract: sendEthMessageContract } = useContractWrite()
+  const { writeContractAsync: sendMessageContract } = useContractWrite()
+  const { writeContractAsync: sendEthMessageContract } = useContractWrite()
 
   const sendTextMessage = async (recipient: string, content: string, isImage: boolean = false) => {
     try {
@@ -52,12 +56,12 @@ export function useDeChat() {
       })
 
       // Wait for the transaction to be confirmed
-      const receipt = await result.wait()
+      await result.wait()
       
       // Refetch the data
       await Promise.all([refetchMessages(), refetchConversations()])
       
-      return receipt
+      return result
     } catch (error) {
       console.error('Error sending message:', error)
       throw error
@@ -80,12 +84,12 @@ export function useDeChat() {
       })
 
       // Wait for the transaction to be confirmed
-      const receipt = await result.wait()
+      await result.wait()
       
       // Refetch the data
       await Promise.all([refetchMessages(), refetchConversations()])
       
-      return receipt
+      return result
     } catch (error) {
       console.error('Error sending ETH message:', error)
       throw error

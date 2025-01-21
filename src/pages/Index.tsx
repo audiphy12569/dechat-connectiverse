@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { ChatSidebar } from "@/components/chat/ChatSidebar"
 import { ChatWindow } from "@/components/chat/ChatWindow"
 import { useDeChat } from "@/hooks/useDeChat"
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Plus } from "lucide-react"
@@ -13,7 +13,7 @@ const Index = () => {
   const { isConnected } = useAccount()
   const [selectedChat, setSelectedChat] = useState<string>()
   const [newAddress, setNewAddress] = useState("")
-  const { conversations, messages, sendTextMessage } = useDeChat()
+  const { conversations, messages, sendTextMessage, sendEthMessage } = useDeChat()
   const { toast } = useToast()
 
   const handleNewChat = () => {
@@ -64,11 +64,29 @@ const Index = () => {
         sender: msg.sender,
         content: msg.content,
         timestamp: new Date(Number(msg.timestamp) * 1000).toLocaleTimeString(),
-        type: msg.isImage ? "image" as const : "text" as const,
+        type: msg.isEthTransfer ? "eth" as const : msg.isImage ? "image" as const : "text" as const,
+        ethAmount: msg.isEthTransfer ? msg.ethAmount.toString() : undefined,
       }))
       .sort((a, b) => 
         new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
       )
+  }
+
+  const handleSendEth = async (amount: string, message: string) => {
+    if (!selectedChat) return
+    try {
+      await sendEthMessage(selectedChat, message, amount)
+      toast({
+        title: "Success",
+        description: `Successfully sent ${amount} ETH!`,
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send ETH",
+        variant: "destructive",
+      })
+    }
   }
 
   if (!isConnected) {
@@ -135,6 +153,7 @@ const Index = () => {
             })
           }
         }}
+        onSendEth={handleSendEth}
       />
     </div>
   )
