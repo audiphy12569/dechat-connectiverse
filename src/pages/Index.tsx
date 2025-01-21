@@ -7,7 +7,8 @@ import { useDeChat } from "@/hooks/useDeChat"
 import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { Plus } from "lucide-react"
+import { Plus, ArrowLeft } from "lucide-react"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 const Index = () => {
   const { isConnected } = useAccount()
@@ -15,6 +16,8 @@ const Index = () => {
   const [newAddress, setNewAddress] = useState("")
   const { conversations, messages, sendTextMessage, sendEthMessage } = useDeChat()
   const { toast } = useToast()
+  const isMobile = useIsMobile()
+  const [showChat, setShowChat] = useState(false)
 
   const handleNewChat = () => {
     if (!newAddress) return
@@ -22,6 +25,7 @@ const Index = () => {
     if (!conversations.includes(newAddress)) {
       setSelectedChat(newAddress)
       setNewAddress("")
+      setShowChat(true)
       toast({
         title: "New chat created",
         description: "You can now start sending messages!",
@@ -33,6 +37,11 @@ const Index = () => {
         variant: "destructive",
       })
     }
+  }
+
+  const handleChatSelect = (address: string) => {
+    setSelectedChat(address)
+    setShowChat(true)
   }
 
   const formatChats = () => {
@@ -103,58 +112,74 @@ const Index = () => {
 
   return (
     <div className="flex h-screen">
-      <div className="relative">
-        <ChatSidebar 
-          chats={formatChats()} 
-          onChatSelect={setSelectedChat} 
-        />
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button 
-              className="absolute bottom-4 right-4" 
-              size="icon"
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>New Chat</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <Input
-                placeholder="Enter Ethereum address"
-                value={newAddress}
-                onChange={(e) => setNewAddress(e.target.value)}
-              />
-              <Button onClick={handleNewChat} className="w-full">
-                Start Chat
+      {(!showChat || !isMobile) && (
+        <div className="relative w-full md:w-80">
+          <ChatSidebar 
+            chats={formatChats()} 
+            onChatSelect={handleChatSelect} 
+          />
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button 
+                className="absolute bottom-4 right-4" 
+                size="icon"
+              >
+                <Plus className="h-4 w-4" />
               </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
-      <ChatWindow
-        recipientAddress={selectedChat}
-        messages={getSelectedChatMessages()}
-        onSendMessage={async (content, type) => {
-          if (!selectedChat) return
-          try {
-            await sendTextMessage(selectedChat, content, type === "image")
-            toast({
-              title: "Success",
-              description: "Message sent successfully!",
-            })
-          } catch (error) {
-            toast({
-              title: "Error",
-              description: "Failed to send message",
-              variant: "destructive",
-            })
-          }
-        }}
-        onSendEth={handleSendEth}
-      />
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>New Chat</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <Input
+                  placeholder="Enter Ethereum address"
+                  value={newAddress}
+                  onChange={(e) => setNewAddress(e.target.value)}
+                />
+                <Button onClick={handleNewChat} className="w-full">
+                  Start Chat
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+      )}
+      {(showChat || !isMobile) && (
+        <div className="flex-1 relative">
+          {isMobile && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-4 left-4 z-10"
+              onClick={() => setShowChat(false)}
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          )}
+          <ChatWindow
+            recipientAddress={selectedChat}
+            messages={getSelectedChatMessages()}
+            onSendMessage={async (content, type) => {
+              if (!selectedChat) return
+              try {
+                await sendTextMessage(selectedChat, content, type === "image")
+                toast({
+                  title: "Success",
+                  description: "Message sent successfully!",
+                })
+              } catch (error) {
+                toast({
+                  title: "Error",
+                  description: "Failed to send message",
+                  variant: "destructive",
+                })
+              }
+            }}
+            onSendEth={handleSendEth}
+          />
+        </div>
+      )}
     </div>
   )
 }

@@ -113,21 +113,21 @@ export function ChatWindow({ recipientAddress, messages, onSendMessage, onSendEt
 
   if (!recipientAddress) {
     return (
-      <div className="flex-1 flex items-center justify-center">
-        <p className="text-muted-foreground">Select a chat to start messaging</p>
+      <div className="flex-1 flex items-center justify-center p-4">
+        <p className="text-muted-foreground text-center">Select a chat to start messaging</p>
       </div>
     )
   }
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col h-screen">
       <div className="border-b p-4 flex items-center space-x-4">
         <Avatar>
           <AvatarImage src={`https://avatar.vercel.sh/${recipientAddress}.png`} />
           <AvatarFallback>{recipientAddress?.slice(2, 4)}</AvatarFallback>
         </Avatar>
-        <div>
-          <p className="font-medium">{truncateAddress(recipientAddress || '')}</p>
+        <div className="flex-1 min-w-0">
+          <p className="font-medium truncate">{truncateAddress(recipientAddress || '')}</p>
         </div>
       </div>
       <div className="flex-1 overflow-auto p-4 space-y-4">
@@ -153,17 +153,19 @@ export function ChatWindow({ recipientAddress, messages, onSendMessage, onSendEt
                   loading="lazy"
                 />
               ) : message.type === 'eth' ? (
-                <div className="flex items-center space-x-2 group transition-all duration-300 ease-in-out">
-                  <div className="flex items-center bg-primary/10 rounded-full p-1.5 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12">
-                    <DollarSign className="h-4 w-4 text-primary transition-colors duration-300 group-hover:text-primary/80" />
-                  </div>
-                  <div className="flex flex-col transition-all duration-300 group-hover:translate-x-1">
-                    <div className="flex items-center space-x-1">
-                      <p className="text-sm font-medium">
-                        Sent {message.ethAmount ? formatEthAmount(message.ethAmount) : '0'} ETH
-                      </p>
+                <div className="eth-amount-container">
+                  <div className="flex items-center space-x-2">
+                    <div className="eth-icon flex items-center bg-primary/10 rounded-full p-1.5">
+                      <DollarSign className="h-4 w-4 text-primary" />
                     </div>
-                    <p className="text-xs opacity-70">{message.content}</p>
+                    <div className="eth-amount flex flex-col">
+                      <div className="flex items-center space-x-1">
+                        <p className="text-sm font-medium">
+                          Sent {message.ethAmount ? formatEthAmount(message.ethAmount) : '0'} ETH
+                        </p>
+                      </div>
+                      <p className="text-xs opacity-70">{message.content}</p>
+                    </div>
                   </div>
                 </div>
               ) : (
@@ -225,7 +227,7 @@ export function ChatWindow({ recipientAddress, messages, onSendMessage, onSendEt
                 <DollarSign className="h-5 w-5" />
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
                 <DialogTitle>Send ETH</DialogTitle>
               </DialogHeader>
