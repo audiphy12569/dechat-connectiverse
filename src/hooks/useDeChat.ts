@@ -12,7 +12,6 @@ export function useDeChat() {
     abi: DeChatABI.abi,
     functionName: 'getUserConversations',
     args: [address],
-    enabled: !!address,
   })
 
   const { data: messages, refetch: refetchMessages } = useContractRead({
@@ -20,16 +19,15 @@ export function useDeChat() {
     abi: DeChatABI.abi,
     functionName: 'getUserMessages',
     args: [address],
-    enabled: !!address,
   })
 
-  const { writeAsync: sendMessage } = useContractWrite({
+  const { writeAsync: write } = useContractWrite({
     address: CONTRACT_ADDRESS as `0x${string}`,
     abi: DeChatABI.abi,
     functionName: 'sendMessage',
   })
 
-  const { writeAsync: sendEthWithMessage } = useContractWrite({
+  const { writeAsync: writeEth } = useContractWrite({
     address: CONTRACT_ADDRESS as `0x${string}`,
     abi: DeChatABI.abi,
     functionName: 'sendEthWithMessage',
@@ -37,7 +35,7 @@ export function useDeChat() {
 
   const sendTextMessage = async (recipient: string, content: string, isImage: boolean = false) => {
     try {
-      const tx = await sendMessage({
+      const tx = await write({
         args: [recipient, content, isImage],
       })
       await tx.wait()
@@ -51,7 +49,7 @@ export function useDeChat() {
 
   const sendEthMessage = async (recipient: string, content: string, amount: string) => {
     try {
-      const tx = await sendEthWithMessage({
+      const tx = await writeEth({
         args: [recipient, content],
         value: parseEther(amount),
       })
