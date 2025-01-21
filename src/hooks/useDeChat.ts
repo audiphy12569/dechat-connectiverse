@@ -1,31 +1,33 @@
-import { useContractRead, useContractWrite } from 'wagmi'
+import { useContractRead, useContractWrite, useAccount } from 'wagmi'
 import { parseEther } from 'viem'
 import DeChatABI from '../contracts/DeChat.json'
 
 const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || '0x0000000000000000000000000000000000000000'
 
 export function useDeChat() {
-  const { data: conversations } = useContractRead({
+  const { address } = useAccount()
+
+  const { data: conversations, refetch: refetchConversations } = useContractRead({
     address: CONTRACT_ADDRESS as `0x${string}`,
     abi: DeChatABI.abi,
     functionName: 'getUserConversations',
     args: [address],
   })
 
-  const { data: messages } = useContractRead({
+  const { data: messages, refetch: refetchMessages } = useContractRead({
     address: CONTRACT_ADDRESS as `0x${string}`,
     abi: DeChatABI.abi,
     functionName: 'getUserMessages',
     args: [address],
   })
 
-  const { write } = useContractWrite({
+  const { writeAsync: write } = useContractWrite({
     address: CONTRACT_ADDRESS as `0x${string}`,
     abi: DeChatABI.abi,
     functionName: 'sendMessage',
   })
 
-  const { write: writeEth } = useContractWrite({
+  const { writeAsync: writeEth } = useContractWrite({
     address: CONTRACT_ADDRESS as `0x${string}`,
     abi: DeChatABI.abi,
     functionName: 'sendEthWithMessage',
@@ -33,10 +35,10 @@ export function useDeChat() {
 
   const sendTextMessage = async (recipient: string, content: string, isImage: boolean = false) => {
     try {
-      const result = await write({
+      const tx = await write({
         args: [recipient, content, isImage],
       })
-      await result?.wait()
+      await tx.wait()
       await refetchMessages()
       await refetchConversations()
     } catch (error) {
@@ -47,11 +49,11 @@ export function useDeChat() {
 
   const sendEthMessage = async (recipient: string, content: string, amount: string) => {
     try {
-      const result = await writeEth({
+      const tx = await writeEth({
         args: [recipient, content],
         value: parseEther(amount),
       })
-      await result?.wait()
+      await tx.wait()
       await refetchMessages()
       await refetchConversations()
     } catch (error) {
@@ -65,5 +67,7 @@ export function useDeChat() {
     messages: (messages || []) as any[],
     sendTextMessage,
     sendEthMessage,
+    refetchMessages,
+    refetchConversations,
   }
 }
