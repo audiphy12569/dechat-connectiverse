@@ -4,6 +4,16 @@ import DeChatABI from '../contracts/DeChat.json'
 
 const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || '0x0000000000000000000000000000000000000000'
 
+interface BlockchainMessage {
+  sender: string;
+  recipient: string;
+  content: string;
+  timestamp: bigint;
+  isImage: boolean;
+  isEthTransfer: boolean;
+  ethAmount: bigint;
+}
+
 export function useDeChat() {
   const { address } = useAccount()
   const config = useConfig()
@@ -13,7 +23,7 @@ export function useDeChat() {
     abi: DeChatABI.abi,
     functionName: 'getUserConversations',
     args: address ? [address] : undefined,
-    watch: true, // This will make it update automatically when new messages arrive
+    enabled: !!address,
   })
 
   const { data: messages, refetch: refetchMessages } = useContractRead({
@@ -21,7 +31,7 @@ export function useDeChat() {
     abi: DeChatABI.abi,
     functionName: 'getUserMessages',
     args: address ? [address] : undefined,
-    watch: true, // This will make it update automatically when new messages arrive
+    enabled: !!address,
   })
 
   const { writeContract: sendMessageContract } = useContractWrite()
@@ -41,13 +51,13 @@ export function useDeChat() {
         account: address,
       })
 
-      // Wait for the transaction to be mined
-      await result.wait()
+      // Wait for the transaction to be confirmed
+      const receipt = await result.wait()
       
       // Refetch the data
       await Promise.all([refetchMessages(), refetchConversations()])
       
-      return result
+      return receipt
     } catch (error) {
       console.error('Error sending message:', error)
       throw error
@@ -69,13 +79,13 @@ export function useDeChat() {
         account: address,
       })
 
-      // Wait for the transaction to be mined
-      await result.wait()
+      // Wait for the transaction to be confirmed
+      const receipt = await result.wait()
       
       // Refetch the data
       await Promise.all([refetchMessages(), refetchConversations()])
       
-      return result
+      return receipt
     } catch (error) {
       console.error('Error sending ETH message:', error)
       throw error
@@ -84,7 +94,7 @@ export function useDeChat() {
 
   return {
     conversations: (conversations || []) as string[],
-    messages: (messages || []) as any[],
+    messages: (messages || []) as BlockchainMessage[],
     sendTextMessage,
     sendEthMessage,
     refetchMessages,

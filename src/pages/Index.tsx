@@ -19,7 +19,6 @@ const Index = () => {
   const handleNewChat = () => {
     if (!newAddress) return
     
-    // Add the address to conversations if it's not already there
     if (!conversations.includes(newAddress)) {
       setSelectedChat(newAddress)
       setNewAddress("")
@@ -37,35 +36,39 @@ const Index = () => {
   }
 
   const formatChats = () => {
-    // Include the selected chat in the list even if no messages yet
     const allAddresses = [...new Set([...conversations, ...(selectedChat ? [selectedChat] : [])])]
     
     return allAddresses.map((address) => {
-      const lastMessage = messages
+      const chatMessages = messages
         .filter((msg) => msg.sender === address || msg.recipient === address)
-        .sort((a, b) => b.timestamp - a.timestamp)[0]
+        .sort((a, b) => Number(b.timestamp - a.timestamp))
+
+      const lastMessage = chatMessages[0]
 
       return {
         address,
         lastMessage: lastMessage?.content || "",
-        timestamp: lastMessage ? new Date(lastMessage.timestamp * 1000).toLocaleTimeString() : "",
+        timestamp: lastMessage ? new Date(Number(lastMessage.timestamp) * 1000).toLocaleTimeString() : "",
       }
     })
   }
 
   const getSelectedChatMessages = () => {
     if (!selectedChat) return []
+    
     return messages
-      .filter(
-        (msg) => msg.sender === selectedChat || msg.recipient === selectedChat
+      .filter(msg => 
+        (msg.sender === selectedChat || msg.recipient === selectedChat)
       )
-      .map((msg) => ({
+      .map(msg => ({
         sender: msg.sender,
         content: msg.content,
-        timestamp: new Date(msg.timestamp * 1000).toLocaleTimeString(),
+        timestamp: new Date(Number(msg.timestamp) * 1000).toLocaleTimeString(),
         type: msg.isImage ? "image" as const : "text" as const,
       }))
-      .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+      .sort((a, b) => 
+        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+      )
   }
 
   if (!isConnected) {
