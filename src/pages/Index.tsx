@@ -16,27 +16,31 @@ const Index = () => {
   const { conversations, messages, sendTextMessage } = useDeChat()
   const { toast } = useToast()
 
-  const handleNewChat = async () => {
+  const handleNewChat = () => {
     if (!newAddress) return
-    try {
-      await sendTextMessage(newAddress, "👋 Hello!")
+    
+    // Add the address to conversations if it's not already there
+    if (!conversations.includes(newAddress)) {
       setSelectedChat(newAddress)
       setNewAddress("")
       toast({
         title: "New chat created",
-        description: "Message sent successfully!",
+        description: "You can now start sending messages!",
       })
-    } catch (error) {
+    } else {
       toast({
-        title: "Error",
-        description: "Failed to create new chat",
+        title: "Chat exists",
+        description: "This chat already exists in your conversations.",
         variant: "destructive",
       })
     }
   }
 
   const formatChats = () => {
-    return conversations.map((address) => {
+    // Include the selected chat in the list even if no messages yet
+    const allAddresses = [...new Set([...conversations, ...(selectedChat ? [selectedChat] : [])])]
+    
+    return allAddresses.map((address) => {
       const lastMessage = messages
         .filter((msg) => msg.sender === address || msg.recipient === address)
         .sort((a, b) => b.timestamp - a.timestamp)[0]
