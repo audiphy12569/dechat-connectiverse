@@ -46,7 +46,7 @@ export function useDeChat() {
       if (!address) throw new Error('Wallet not connected')
       if (!recipient) throw new Error('Recipient address required')
       
-      const { hash } = await sendMessageContract({
+      const result = await sendMessageContract({
         abi: DeChatABI.abi,
         address: CONTRACT_ADDRESS as `0x${string}`,
         functionName: 'sendMessage',
@@ -56,12 +56,12 @@ export function useDeChat() {
       })
 
       // Wait for transaction confirmation
-      await hash
+      await result.hash
       
       // Refetch the data after confirmation
       await Promise.all([refetchMessages(), refetchConversations()])
       
-      return hash
+      return result.hash
     } catch (error) {
       console.error('Error sending message:', error)
       throw error
@@ -73,7 +73,7 @@ export function useDeChat() {
       if (!address) throw new Error('Wallet not connected')
       if (!recipient) throw new Error('Recipient address required')
       
-      const { hash } = await sendEthMessageContract({
+      const result = await sendEthMessageContract({
         abi: DeChatABI.abi,
         address: CONTRACT_ADDRESS as `0x${string}`,
         functionName: 'sendEthWithMessage',
@@ -84,12 +84,12 @@ export function useDeChat() {
       })
 
       // Wait for transaction confirmation
-      await hash
+      await result.hash
       
       // Refetch the data after confirmation
       await Promise.all([refetchMessages(), refetchConversations()])
       
-      return hash
+      return result.hash
     } catch (error) {
       console.error('Error sending ETH message:', error)
       throw error
