@@ -2,7 +2,8 @@ import { createWeb3Modal } from '@web3modal/wagmi/react'
 import { defaultWagmiConfig } from '@web3modal/wagmi/react/config'
 import { sepolia } from 'viem/chains'
 
-const projectId = 'YOUR_WALLETCONNECT_PROJECT_ID'
+// Get project ID from environment variable
+const projectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || 'YOUR_WALLETCONNECT_PROJECT_ID'
 
 const metadata = {
   name: 'DeChat',
