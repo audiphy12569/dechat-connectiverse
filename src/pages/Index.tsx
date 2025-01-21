@@ -59,7 +59,7 @@ const Index = () => {
         sender: msg.sender,
         content: msg.content,
         timestamp: new Date(msg.timestamp * 1000).toLocaleTimeString(),
-        type: msg.isImage ? "image" : "text",
+        type: msg.isImage ? "image" as const : "text" as const,
       }))
       .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
   }
