@@ -12,14 +12,14 @@ const metadata = {
 }
 
 export const config = defaultWagmiConfig({
-  chains: [sepolia],
   projectId,
   metadata,
+  chains: [sepolia],
 })
 
 createWeb3Modal({ 
   wagmiConfig: config, 
-  projectId, 
-  chains: [sepolia],
+  projectId,
+  chainId: sepolia.id,
   themeMode: 'dark'
 })
