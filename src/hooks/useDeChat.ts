@@ -21,15 +21,15 @@ export function useDeChat() {
     args: address ? [address] : undefined,
   })
 
-  const { write: sendMessage } = useContractWrite({
-    address: CONTRACT_ADDRESS as `0x${string}`,
+  const { writeContract: sendMessageContract } = useContractWrite({
     abi: DeChatABI.abi,
+    address: CONTRACT_ADDRESS as `0x${string}`,
     functionName: 'sendMessage',
   })
 
-  const { write: sendEthWithMessage } = useContractWrite({
-    address: CONTRACT_ADDRESS as `0x${string}`,
+  const { writeContract: sendEthMessageContract } = useContractWrite({
     abi: DeChatABI.abi,
+    address: CONTRACT_ADDRESS as `0x${string}`,
     functionName: 'sendEthWithMessage',
   })
 
@@ -37,9 +37,9 @@ export function useDeChat() {
     try {
       if (!address) throw new Error('Wallet not connected')
       if (!recipient) throw new Error('Recipient address required')
-      if (!sendMessage) throw new Error('Contract write not ready')
+      if (!sendMessageContract) throw new Error('Contract write not ready')
       
-      const tx = await sendMessage({
+      const tx = await sendMessageContract({
         args: [recipient, content, isImage],
       })
       
@@ -56,9 +56,9 @@ export function useDeChat() {
     try {
       if (!address) throw new Error('Wallet not connected')
       if (!recipient) throw new Error('Recipient address required')
-      if (!sendEthWithMessage) throw new Error('Contract write not ready')
+      if (!sendEthMessageContract) throw new Error('Contract write not ready')
       
-      const tx = await sendEthWithMessage({
+      const tx = await sendEthMessageContract({
         args: [recipient, content],
         value: parseEther(amount),
       })
