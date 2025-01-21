@@ -3,37 +3,66 @@ import { useAccount } from "wagmi"
 import { Button } from "@/components/ui/button"
 import { ChatSidebar } from "@/components/chat/ChatSidebar"
 import { ChatWindow } from "@/components/chat/ChatWindow"
+import { useDeChat } from "@/hooks/useDeChat"
+import { useToast } from "@/components/ui/use-toast"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Plus } from "lucide-react"
 
 const Index = () => {
   const { isConnected } = useAccount()
   const [selectedChat, setSelectedChat] = useState<string>()
-  
-  // Temporary mock data
-  const mockChats = [
-    {
-      address: "0x1234567890123456789012345678901234567890",
-      lastMessage: "Hey there!",
-      timestamp: "12:30",
-    },
-    {
-      address: "0x9876543210987654321098765432109876543210",
-      lastMessage: "Got your message",
-      timestamp: "11:45",
-    },
-  ]
+  const [newAddress, setNewAddress] = useState("")
+  const { conversations, messages, sendTextMessage } = useDeChat()
+  const { toast } = useToast()
 
-  const mockMessages = [
-    {
-      sender: "0x1234567890123456789012345678901234567890",
-      content: "Hey there!",
-      timestamp: "12:30",
-    },
-    {
-      sender: "me",
-      content: "Hi! How are you?",
-      timestamp: "12:31",
-    },
-  ]
+  const handleNewChat = async () => {
+    if (!newAddress) return
+    try {
+      await sendTextMessage(newAddress, "👋 Hello!")
+      setSelectedChat(newAddress)
+      setNewAddress("")
+      toast({
+        title: "New chat created",
+        description: "Message sent successfully!",
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create new chat",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const formatChats = () => {
+    return conversations.map((address) => {
+      const lastMessage = messages
+        .filter((msg) => msg.sender === address || msg.recipient === address)
+        .sort((a, b) => b.timestamp - a.timestamp)[0]
+
+      return {
+        address,
+        lastMessage: lastMessage?.content || "",
+        timestamp: lastMessage ? new Date(lastMessage.timestamp * 1000).toLocaleTimeString() : "",
+      }
+    })
+  }
+
+  const getSelectedChatMessages = () => {
+    if (!selectedChat) return []
+    return messages
+      .filter(
+        (msg) => msg.sender === selectedChat || msg.recipient === selectedChat
+      )
+      .map((msg) => ({
+        sender: msg.sender,
+        content: msg.content,
+        timestamp: new Date(msg.timestamp * 1000).toLocaleTimeString(),
+        type: msg.isImage ? "image" : "text",
+      }))
+      .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+  }
 
   if (!isConnected) {
     return (
@@ -49,11 +78,56 @@ const Index = () => {
 
   return (
     <div className="flex h-screen">
-      <ChatSidebar chats={mockChats} onChatSelect={setSelectedChat} />
+      <div className="relative">
+        <ChatSidebar 
+          chats={formatChats()} 
+          onChatSelect={setSelectedChat} 
+        />
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button 
+              className="absolute bottom-4 right-4" 
+              size="icon"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>New Chat</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Input
+                placeholder="Enter Ethereum address"
+                value={newAddress}
+                onChange={(e) => setNewAddress(e.target.value)}
+              />
+              <Button onClick={handleNewChat} className="w-full">
+                Start Chat
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
       <ChatWindow
         recipientAddress={selectedChat}
-        messages={mockMessages}
-        onSendMessage={console.log}
+        messages={getSelectedChatMessages()}
+        onSendMessage={async (content, type) => {
+          if (!selectedChat) return
+          try {
+            await sendTextMessage(selectedChat, content, type === "image")
+            toast({
+              title: "Success",
+              description: "Message sent successfully!",
+            })
+          } catch (error) {
+            toast({
+              title: "Error",
+              description: "Failed to send message",
+              variant: "destructive",
+            })
+          }
+        }}
       />
     </div>
   )
