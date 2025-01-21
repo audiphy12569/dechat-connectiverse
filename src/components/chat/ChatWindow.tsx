@@ -128,28 +128,33 @@ export function ChatWindow({ recipientAddress, messages, onSendMessage, onSendEt
             }`}
           >
             <div
-              className={`rounded-lg px-4 py-2 max-w-[70%] ${
+              className={`message-bubble ${
                 message.sender === recipientAddress
-                  ? 'bg-secondary'
-                  : 'bg-primary text-primary-foreground'
+                  ? 'message-bubble-received'
+                  : 'message-bubble-sent'
               }`}
             >
               {message.type === 'image' ? (
                 <img 
                   src={message.content} 
                   alt="Sent image" 
-                  className="max-w-full rounded-lg"
+                  className="max-w-full h-auto max-h-[300px] rounded-lg object-contain"
                   loading="lazy"
                 />
               ) : message.type === 'eth' ? (
                 <div className="flex items-center space-x-2">
-                  <DollarSign className="h-5 w-5" />
-                  <p className="text-sm">{message.content}</p>
+                  <div className="flex items-center bg-whatsapp-primary/10 rounded-full p-1">
+                    <DollarSign className="h-4 w-4 text-whatsapp-primary" />
+                  </div>
+                  <div className="flex flex-col">
+                    <p className="text-sm font-medium">Sent {message.ethAmount} ETH</p>
+                    <p className="text-xs opacity-70">{message.content}</p>
+                  </div>
                 </div>
               ) : (
                 <p className="text-sm">{message.content}</p>
               )}
-              <p className="text-xs opacity-70">{message.timestamp}</p>
+              <p className="text-xs opacity-70 mt-1">{message.timestamp}</p>
             </div>
           </div>
         ))}

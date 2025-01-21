@@ -63,7 +63,7 @@
 }
 
 .message-bubble {
-  @apply rounded-lg px-4 py-2 max-w-[70%];
+  @apply rounded-lg px-4 py-2 max-w-[70%] break-words;
 }
 
 .message-bubble-received {
@@ -72,4 +72,8 @@
 
 .message-bubble-sent {
   @apply bg-primary text-primary-foreground;
+}
+
+.message-bubble img {
+  @apply max-w-full h-auto max-h-[300px] object-contain rounded-lg;
 }
