@@ -104,7 +104,7 @@ const Index = () => {
         <img 
           src="/dechat-logo.png" 
           alt="DeChat Logo" 
-          className="w-32 h-32 mb-6 animate-fade-in hover:scale-110 transition-transform duration-300"
+          className="w-32 h-32 mb-6 animate-bounce hover:scale-110 transition-transform duration-300"
         />
         <h1 className="text-4xl font-bold mb-8">Welcome to DeChat</h1>
         <p className="text-xl text-muted-foreground mb-8 text-center max-w-md">
@@ -119,18 +119,6 @@ const Index = () => {
     <div className="flex h-screen">
       {(!showChat || !isMobile) && (
         <div className="relative w-full md:w-80">
-          {!selectedChat && (
-            <div className="flex flex-col items-center justify-center h-full space-y-4 p-4">
-              <img 
-                src="/dechat-logo.png" 
-                alt="DeChat Logo" 
-                className="w-24 h-24 mb-4 animate-fade-in"
-              />
-              <p className="text-lg text-center text-muted-foreground">
-                Select a chat to start messaging
-              </p>
-            </div>
-          )}
           <ChatSidebar 
             chats={formatChats()} 
             onChatSelect={handleChatSelect} 
@@ -174,27 +162,40 @@ const Index = () => {
               <ArrowLeft className="h-4 w-4" />
             </Button>
           )}
-          <ChatWindow
-            recipientAddress={selectedChat}
-            messages={getSelectedChatMessages()}
-            onSendMessage={async (content, type) => {
-              if (!selectedChat) return
-              try {
-                await sendTextMessage(selectedChat, content, type === "image")
-                toast({
-                  title: "Success",
-                  description: "Message sent successfully!",
-                })
-              } catch (error) {
-                toast({
-                  title: "Error",
-                  description: "Failed to send message",
-                  variant: "destructive",
-                })
-              }
-            }}
-            onSendEth={handleSendEth}
-          />
+          {!selectedChat ? (
+            <div className="h-full flex flex-col items-center justify-center p-4">
+              <img 
+                src="/dechat-logo.png" 
+                alt="DeChat Logo" 
+                className="w-40 h-40 mb-6 animate-pulse hover:animate-bounce transition-all duration-300"
+              />
+              <p className="text-xl text-muted-foreground text-center">
+                Select a chat to start messaging
+              </p>
+            </div>
+          ) : (
+            <ChatWindow
+              recipientAddress={selectedChat}
+              messages={getSelectedChatMessages()}
+              onSendMessage={async (content, type) => {
+                if (!selectedChat) return
+                try {
+                  await sendTextMessage(selectedChat, content, type === "image")
+                  toast({
+                    title: "Success",
+                    description: "Message sent successfully!",
+                  })
+                } catch (error) {
+                  toast({
+                    title: "Error",
+                    description: "Failed to send message",
+                    variant: "destructive",
+                  })
+                }
+              }}
+              onSendEth={handleSendEth}
+            />
+          )}
         </div>
       )}
     </div>
