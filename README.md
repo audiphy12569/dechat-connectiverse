@@ -1,69 +1,12 @@
-# Welcome to your Lovable project
+Here is the prompt guys -:  [ Video ko like kar dena yarr aurr channel ko subscribe bhaiiiii pls ]
 
-## Project info
+Create a decentralized Web3 chat application named DeChat inspired by WhatsApp. The application will allow any user to connect their wallet and send messages to any other EVM wallet address. The smart contract should have no admin, meaning any user who connects their wallet will automatically have the option to send a new message. Users can input a recipient's wallet address, type a message, and send it. After sending, a chat list will display with a default fake human-like icon for all users. If the recipient connects their wallet, they can view the message and respond. The chat list should show wallet addresses (e.g., 0xabc...) with the default icon. Messages will be stored on the blockchain to ensure decentralization.
 
-**URL**: https://lovable.dev/projects/105c53d5-984a-4728-9269-6c75c39d7db2
+Users can also send images, which will be uploaded and stored on Pinata IPFS, and retrieved from there when needed. Additionally, users can send ETH by clicking a $ icon, entering the amount, and completing the transaction. When money is sent, a message such as "User A sent you X ETH to your address" will automatically appear in the chat. Both message and image functionality should be designed to ensure smooth, fast, and reliable fetching of data.
 
-## How can I edit this code?
+The frontend should replicate a WhatsApp-style UI but modified for our specific functionalities. It should support dark and light themes, be mobile-friendly, and include advanced animations for a modern user experience. Users who have not connected their wallets will see a simple landing page with a wallet connect button, using the WalletConnect API. The landing page design should match the theme of the application.
 
-There are several ways of editing your application.
+Ensure to include an .env example file for environment variables like smart contract address and Pinata IPFS keys. The application will run on the Sepolia testnet, and all features, including wallet connection, message sending, image upload, and ETH transfer, should be decentralized.
 
-**Use Lovable**
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/105c53d5-984a-4728-9269-6c75c39d7db2) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with .
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/105c53d5-984a-4728-9269-6c75c39d7db2) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+I want full frontend and smart contract code also add a ABI file for the smart contract. 
