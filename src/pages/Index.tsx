@@ -101,6 +101,11 @@ const Index = () => {
   if (!isConnected) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-primary/20 to-background p-4">
+        <img 
+          src="/dechat-logo.png" 
+          alt="DeChat Logo" 
+          className="w-32 h-32 mb-6 animate-fade-in hover:scale-110 transition-transform duration-300"
+        />
         <h1 className="text-4xl font-bold mb-8">Welcome to DeChat</h1>
         <p className="text-xl text-muted-foreground mb-8 text-center max-w-md">
           Connect your wallet to start sending messages to any Ethereum address
@@ -114,6 +119,18 @@ const Index = () => {
     <div className="flex h-screen">
       {(!showChat || !isMobile) && (
         <div className="relative w-full md:w-80">
+          {!selectedChat && (
+            <div className="flex flex-col items-center justify-center h-full space-y-4 p-4">
+              <img 
+                src="/dechat-logo.png" 
+                alt="DeChat Logo" 
+                className="w-24 h-24 mb-4 animate-fade-in"
+              />
+              <p className="text-lg text-center text-muted-foreground">
+                Select a chat to start messaging
+              </p>
+            </div>
+          )}
           <ChatSidebar 
             chats={formatChats()} 
             onChatSelect={handleChatSelect} 
