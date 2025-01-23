@@ -17,25 +17,14 @@ const metadata = {
 // Configure chains for the Wagmi client
 const chains = [sepolia]
 
-// Create the Wagmi config with the relayer
+// Create the Wagmi config
 export const config = defaultWagmiConfig({
   projectId,
   metadata,
   chains,
   transports: {
     [sepolia.id]: http(),
-  },
-  // Add GSN configuration
-  gasless: {
-    enabled: true,
-    provider: {
-      type: 'gsn',
-      config: {
-        paymasterAddress: forwarderAddress,
-        performDryRun: true,
-      },
-    },
-  },
+  }
 })
 
 // Create a public client for reading from the blockchain

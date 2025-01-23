@@ -38,24 +38,21 @@ export function useDeChat() {
   })
 
   const { writeContractAsync: sendMessageContract } = useContractWrite({
-    gas: 0n, // Set gas to 0 to use relayer
     account: address,
     address: CONTRACT_ADDRESS as `0x${string}`,
     abi: DeChatABI.abi,
     functionName: 'sendMessage',
-    // Add GSN configuration
-    meta: {
-      gasless: {
-        enabled: true,
-        provider: {
-          type: 'gsn',
-          config: {
-            paymasterAddress: forwarderAddress,
-            performDryRun: true,
-          },
-        },
-      },
+    // Configure for gasless transactions
+    request: {
+      gasLimit: 0n, // Set to 0 to use relayer
+      from: address,
+      to: CONTRACT_ADDRESS as `0x${string}`,
+      data: '0x', // This will be set by wagmi
     },
+    // Add trusted forwarder
+    meta: {
+      trustedForwarder: forwarderAddress,
+    }
   })
 
   const { writeContractAsync: sendEthMessageContract } = useContractWrite({
@@ -71,11 +68,15 @@ export function useDeChat() {
       if (!address) throw new Error('Wallet not connected')
       if (!recipient) throw new Error('Recipient address required')
       
+      console.log('Sending message with args:', { recipient, content, isImage })
+      
       const tx = await sendMessageContract({
         args: [recipient, content, isImage, false], // false for isVoiceMessage
         chain: config.chains[0],
       })
 
+      console.log('Transaction sent:', tx)
+      
       await tx
       
       await Promise.all([refetchMessages(), refetchConversations()])
