@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-contract DeChat {
+import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract DeChat is ERC2771Context, Ownable {
     struct Message {
         address sender;
         address recipient;
@@ -10,12 +13,19 @@ contract DeChat {
         bool isImage;
         bool isEthTransfer;
         uint256 ethAmount;
+        bool isVoiceMessage;
     }
 
     // Mapping from user address to their messages
     mapping(address => Message[]) private userMessages;
     // Mapping to track conversations between users
     mapping(address => address[]) private userConversations;
+    // Mapping for usernames (address => username)
+    mapping(address => string) private usernames;
+    // Mapping to track if a username is taken
+    mapping(string => bool) private usernameExists;
+    // Trusted forwarder for meta-transactions
+    address private trustedForwarder;
 
     event MessageSent(
         address indexed sender,
@@ -24,37 +34,57 @@ contract DeChat {
         uint256 timestamp,
         bool isImage,
         bool isEthTransfer,
-        uint256 ethAmount
+        uint256 ethAmount,
+        bool isVoiceMessage
     );
 
-    function sendMessage(address _recipient, string memory _content, bool _isImage) external {
+    event UsernameSet(address indexed user, string username);
+
+    constructor(address _trustedForwarder) ERC2771Context(_trustedForwarder) {
+        trustedForwarder = _trustedForwarder;
+    }
+
+    function setTrustedForwarder(address _trustedForwarder) external onlyOwner {
+        trustedForwarder = _trustedForwarder;
+    }
+
+    function _msgSender() internal view virtual override(ERC2771Context) returns (address) {
+        return super._msgSender();
+    }
+
+    function _msgData() internal view virtual override(ERC2771Context) returns (bytes calldata) {
+        return super._msgData();
+    }
+
+    function sendMessage(address _recipient, string memory _content, bool _isImage, bool _isVoiceMessage) external {
         require(_recipient != address(0), "Invalid recipient address");
         
         Message memory newMessage = Message({
-            sender: msg.sender,
+            sender: _msgSender(),
             recipient: _recipient,
             content: _content,
             timestamp: block.timestamp,
             isImage: _isImage,
             isEthTransfer: false,
-            ethAmount: 0
+            ethAmount: 0,
+            isVoiceMessage: _isVoiceMessage
         });
 
-        userMessages[msg.sender].push(newMessage);
+        userMessages[_msgSender()].push(newMessage);
         userMessages[_recipient].push(newMessage);
 
-        // Add to conversations if not already present
-        _addToConversations(msg.sender, _recipient);
-        _addToConversations(_recipient, msg.sender);
+        _addToConversations(_msgSender(), _recipient);
+        _addToConversations(_recipient, _msgSender());
 
         emit MessageSent(
-            msg.sender,
+            _msgSender(),
             _recipient,
             _content,
             block.timestamp,
             _isImage,
             false,
-            0
+            0,
+            _isVoiceMessage
         );
     }
 
@@ -63,35 +93,51 @@ contract DeChat {
         require(msg.value > 0, "Must send some ETH");
 
         Message memory newMessage = Message({
-            sender: msg.sender,
+            sender: _msgSender(),
             recipient: _recipient,
             content: _content,
             timestamp: block.timestamp,
             isImage: false,
             isEthTransfer: true,
-            ethAmount: msg.value
+            ethAmount: msg.value,
+            isVoiceMessage: false
         });
 
-        userMessages[msg.sender].push(newMessage);
+        userMessages[_msgSender()].push(newMessage);
         userMessages[_recipient].push(newMessage);
 
-        // Add to conversations if not already present
-        _addToConversations(msg.sender, _recipient);
-        _addToConversations(_recipient, msg.sender);
+        _addToConversations(_msgSender(), _recipient);
+        _addToConversations(_recipient, _msgSender());
 
-        // Transfer ETH
         (bool sent, ) = _recipient.call{value: msg.value}("");
         require(sent, "Failed to send ETH");
 
         emit MessageSent(
-            msg.sender,
+            _msgSender(),
             _recipient,
             _content,
             block.timestamp,
             false,
             true,
-            msg.value
+            msg.value,
+            false
         );
+    }
+
+    function setUsername(string memory _username) external {
+        require(bytes(_username).length > 0, "Username cannot be empty");
+        require(bytes(_username).length <= 32, "Username too long");
+        require(!usernameExists[_username], "Username already taken");
+        
+        string memory oldUsername = usernames[_msgSender()];
+        if (bytes(oldUsername).length > 0) {
+            usernameExists[oldUsername] = false;
+        }
+        
+        usernames[_msgSender()] = _username;
+        usernameExists[_username] = true;
+        
+        emit UsernameSet(_msgSender(), _username);
     }
 
     function getUserMessages(address _user) external view returns (Message[] memory) {
@@ -100,6 +146,10 @@ contract DeChat {
 
     function getUserConversations(address _user) external view returns (address[] memory) {
         return userConversations[_user];
+    }
+
+    function getUsername(address _user) external view returns (string memory) {
+        return usernames[_user];
     }
 
     function _addToConversations(address _user1, address _user2) private {
