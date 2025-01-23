@@ -1,13 +1,7 @@
 {
   "abi": [
     {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "_trustedForwarder",
-          "type": "address"
-        }
-      ],
+      "inputs": [],
       "stateMutability": "nonpayable",
       "type": "constructor"
     },
