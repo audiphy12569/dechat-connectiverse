@@ -4,7 +4,7 @@ import { sepolia } from 'viem/chains'
 import { createPublicClient, http } from 'viem'
 
 const projectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || 'YOUR_WALLETCONNECT_PROJECT_ID'
-const forwarderAddress = import.meta.env.VITE_FORWARDER_ADDRESS || '0xB2b5841DBeF766d4b521221732F9B618fCf34A87' // OpenGSN Forwarder on Sepolia
+const forwarderAddress = '0x85d4F7d979A3870a7edb81BB3C734d9bC2B24068' // OpenGSN Forwarder on Sepolia
 const CONTRACT_ADDRESS = '0xb503B14e272e8Fa8C0F6470be100D4703c2be3C7'
 
 const metadata = {

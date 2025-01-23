@@ -38,8 +38,8 @@ contract DeChat is ERC2771Context, Ownable {
 
     event UsernameSet(address indexed user, string username);
 
-    constructor(address _trustedForwarder) 
-        ERC2771Context(_trustedForwarder)
+    constructor() 
+        ERC2771Context(0x85d4F7d979A3870a7edb81BB3C734d9bC2B24068)
         Ownable(msg.sender) 
     {}
 
@@ -89,7 +89,6 @@ contract DeChat is ERC2771Context, Ownable {
         require(_recipient != address(0), "Invalid recipient address");
         require(msg.value > 0, "Must send some ETH");
 
-        // ETH transfers must use msg.sender since they involve actual value transfer
         address sender = msg.sender;
 
         Message memory newMessage = Message({
