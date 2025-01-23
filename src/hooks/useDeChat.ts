@@ -48,13 +48,11 @@ export function useDeChat() {
       if (!recipient) throw new Error('Recipient address required')
       
       // Use gasless client for message sending
-      const tx = await sendMessageContract({
+      const tx = await gaslessClient.writeContract({
         abi: DeChatABI.abi,
         address: CONTRACT_ADDRESS as `0x${string}`,
         functionName: 'sendMessage',
         args: [recipient, content, isImage, false],
-        chain: config.chains[0],
-        account: address,
       })
 
       await tx
