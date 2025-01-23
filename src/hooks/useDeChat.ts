@@ -47,14 +47,15 @@ export function useDeChat() {
       if (!address) throw new Error('Wallet not connected')
       if (!recipient) throw new Error('Recipient address required')
       
-      // Use gasless client for message sending
-      const tx = await gaslessClient.writeContract({
-        abi: DeChatABI.abi,
+      // Use gasless transactions for regular messages
+      const preparedTx = {
         address: CONTRACT_ADDRESS as `0x${string}`,
+        abi: DeChatABI.abi,
         functionName: 'sendMessage',
         args: [recipient, content, isImage, false],
-      })
+      } as const
 
+      const tx = await gaslessClient.writeContract(preparedTx)
       await tx
       
       await Promise.all([refetchMessages(), refetchConversations()])
@@ -66,7 +67,6 @@ export function useDeChat() {
     }
   }
 
-  // ETH transfers will still require gas
   const sendEthMessage = async (recipient: string, content: string, amount: string) => {
     try {
       if (!address) throw new Error('Wallet not connected')

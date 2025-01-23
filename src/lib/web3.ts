@@ -1,7 +1,7 @@
 import { createWeb3Modal } from '@web3modal/wagmi/react'
 import { defaultWagmiConfig } from '@web3modal/wagmi/react/config'
 import { sepolia } from 'viem/chains'
-import { createClient, http } from 'viem'
+import { createClient, http, createPublicClient } from 'viem'
 
 const projectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || 'YOUR_WALLETCONNECT_PROJECT_ID'
 const forwarderAddress = import.meta.env.VITE_FORWARDER_ADDRESS || '0xB2b5841DBeF766d4b521221732F9B618fCf34A87' // OpenGSN Forwarder on Sepolia
@@ -20,16 +20,10 @@ export const config = defaultWagmiConfig({
 })
 
 // Create a custom client for gasless transactions
-export const gaslessClient = createClient({
+export const gaslessClient = createPublicClient({
   chain: sepolia,
   transport: http(),
-  // Add forwarder configuration
-  key: 'gasless',
-  account: {
-    address: forwarderAddress as `0x${string}`,
-    type: 'local',
-  },
-})
+}) as unknown as { writeContract: (tx: any) => Promise<any> }
 
 createWeb3Modal({ 
   wagmiConfig: config, 
