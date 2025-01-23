@@ -53,7 +53,7 @@ export function useDeChat() {
         abi: DeChatABI.abi,
         functionName: 'sendMessage',
         args: [recipient, content, isImage, false],
-      } as const
+      }
 
       const tx = await gaslessClient.writeContract(preparedTx)
       await tx
