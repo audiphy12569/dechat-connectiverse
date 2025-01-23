@@ -4,13 +4,14 @@ import DeChatABI from '../contracts/DeChat.json'
 import { CONTRACT_ADDRESS, forwarderAddress } from '../lib/web3'
 
 interface BlockchainMessage {
-  sender: string;
-  recipient: string;
+  sender: `0x${string}`;
+  recipient: `0x${string}`;
   content: string;
   timestamp: bigint;
   isImage: boolean;
   isEthTransfer: boolean;
   ethAmount: bigint;
+  isVoiceMessage: boolean;
 }
 
 export function useDeChat() {
@@ -67,20 +68,19 @@ export function useDeChat() {
       
       console.log('Sending message with args:', { recipient, content, isImage })
       
-      // Type the arguments explicitly
-      const messageArgs = {
-        args: [
-          recipient as `0x${string}`,
-          content,
-          isImage,
-          false // isVoiceMessage
-        ] as const,
-        chain: config.chains[0]
-      }
+      const args = [
+        recipient as `0x${string}`,
+        content,
+        isImage,
+        false // isVoiceMessage
+      ] as const
 
-      console.log('Formatted message args:', messageArgs)
+      console.log('Formatted args:', args)
       
-      const tx = await sendMessageContract(messageArgs)
+      const tx = await sendMessageContract({
+        args,
+        chain: config.chains[0]
+      })
       
       console.log('Transaction:', tx)
       
@@ -118,7 +118,7 @@ export function useDeChat() {
   }
 
   return {
-    conversations: (conversations || []) as string[],
+    conversations: (conversations || []) as `0x${string}`[],
     messages: (messages || []) as BlockchainMessage[],
     sendTextMessage,
     sendEthMessage,
