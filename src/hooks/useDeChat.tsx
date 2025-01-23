@@ -42,15 +42,6 @@ export function useDeChat() {
     abi: DeChatABI.abi,
     functionName: 'sendMessage',
     account: address,
-    meta: {
-      gasless: true,
-      trustedForwarder: forwarderAddress,
-      opengsn: {
-        useGSN: true,
-        forwarder: forwarderAddress,
-        preferredRelays: ['https://api.defender.openzeppelin.com/autotasks/'],
-      }
-    }
   })
 
   const { writeContractAsync: sendEthMessageContract } = useContractWrite({
@@ -67,22 +58,22 @@ export function useDeChat() {
       
       console.log('Sending message with args:', { recipient, content, isImage })
       
-      // Ensure arguments are properly typed and ordered according to the contract
-      const args: [`0x${string}`, string, boolean, boolean] = [
+      // Create the args array directly
+      const args = [
         recipient as `0x${string}`,
         content,
         isImage,
         false // isVoiceMessage
-      ]
+      ] as const
 
       console.log('Formatted args:', args)
       
       const tx = await sendMessageContract({
         args,
-        chain: config.chains[0],
+        chain: config.chains[0]
       })
-
-      console.log('Transaction hash:', tx)
+      
+      console.log('Transaction:', tx)
       
       await tx
       
@@ -103,7 +94,7 @@ export function useDeChat() {
       const tx = await sendEthMessageContract({
         args: [recipient as `0x${string}`, content],
         value: parseEther(amount),
-        chain: config.chains[0],
+        chain: config.chains[0]
       })
 
       await tx
