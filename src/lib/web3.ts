@@ -20,11 +20,12 @@ export const config = defaultWagmiConfig({
   chains: [sepolia],
 })
 
-// Create a wallet client for gasless transactions
+// Create a gasless client using OpenGSN forwarder
 export const gaslessClient = createWalletClient({
   chain: sepolia,
   transport: custom(window.ethereum),
-}) 
+  account: forwarderAddress as `0x${string}`,
+})
 
 createWeb3Modal({ 
   wagmiConfig: config, 
@@ -33,4 +34,4 @@ createWeb3Modal({
   themeMode: 'dark'
 })
 
-export { CONTRACT_ADDRESS }
+export { CONTRACT_ADDRESS, forwarderAddress }

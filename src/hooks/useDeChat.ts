@@ -1,7 +1,7 @@
 import { useContractRead, useContractWrite, useAccount, useConfig } from 'wagmi'
 import { parseEther } from 'viem'
 import DeChatABI from '../contracts/DeChat.json'
-import { CONTRACT_ADDRESS } from '../lib/web3'
+import { CONTRACT_ADDRESS, gaslessClient, forwarderAddress } from '../lib/web3'
 
 interface BlockchainMessage {
   sender: string;
@@ -45,14 +45,13 @@ export function useDeChat() {
       if (!address) throw new Error('Wallet not connected')
       if (!recipient) throw new Error('Recipient address required')
       
-      // Add isVoiceMessage parameter (false for text/image messages)
-      const tx = await sendMessageContract({
+      // Use gasless transaction through the forwarder
+      const tx = await gaslessClient.writeContract({
         abi: DeChatABI.abi,
         address: CONTRACT_ADDRESS as `0x${string}`,
         functionName: 'sendMessage',
-        args: [recipient, content, isImage, false], // Added false for isVoiceMessage
-        chain: config.chains[0],
-        account: address,
+        args: [recipient, content, isImage, false], // false for isVoiceMessage
+        account: forwarderAddress as `0x${string}`,
       })
 
       await tx
