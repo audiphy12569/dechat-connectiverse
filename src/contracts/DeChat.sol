@@ -51,6 +51,10 @@ contract DeChat is ERC2771Context, Ownable {
         return ERC2771Context._msgData();
     }
 
+    function _contextSuffixLength() internal view virtual override(Context, ERC2771Context) returns (uint256) {
+        return ERC2771Context._contextSuffixLength();
+    }
+
     function sendMessage(address _recipient, string memory _content, bool _isImage, bool _isVoiceMessage) external {
         require(_recipient != address(0), "Invalid recipient address");
         
