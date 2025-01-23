@@ -1,7 +1,7 @@
 import { useContractRead, useContractWrite, useAccount, useConfig } from 'wagmi'
 import { parseEther } from 'viem'
 import DeChatABI from '../contracts/DeChat.json'
-import { CONTRACT_ADDRESS, gaslessClient, forwarderAddress } from '../lib/web3'
+import { CONTRACT_ADDRESS, publicClient } from '../lib/web3'
 
 interface BlockchainMessage {
   sender: string;
@@ -45,13 +45,14 @@ export function useDeChat() {
       if (!address) throw new Error('Wallet not connected')
       if (!recipient) throw new Error('Recipient address required')
       
-      // Use gasless transaction through the forwarder
-      const tx = await gaslessClient.writeContract({
+      // Use regular contract write for now until gasless is fully implemented
+      const tx = await sendMessageContract({
         abi: DeChatABI.abi,
         address: CONTRACT_ADDRESS as `0x${string}`,
         functionName: 'sendMessage',
         args: [recipient, content, isImage, false], // false for isVoiceMessage
-        account: forwarderAddress as `0x${string}`,
+        chain: config.chains[0],
+        account: address,
       })
 
       await tx
