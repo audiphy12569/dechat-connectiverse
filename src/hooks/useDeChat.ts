@@ -38,18 +38,11 @@ export function useDeChat() {
   })
 
   const { writeContractAsync: sendMessageContract } = useContractWrite({
-    account: address,
     address: CONTRACT_ADDRESS as `0x${string}`,
     abi: DeChatABI.abi,
     functionName: 'sendMessage',
+    account: address,
     // Configure for gasless transactions
-    request: {
-      gasLimit: 0n, // Set to 0 to use relayer
-      from: address,
-      to: CONTRACT_ADDRESS as `0x${string}`,
-      data: '0x', // This will be set by wagmi
-    },
-    // Add trusted forwarder
     meta: {
       trustedForwarder: forwarderAddress,
     }
