@@ -24,8 +24,6 @@ contract DeChat is ERC2771Context, Ownable {
     mapping(address => string) private usernames;
     // Mapping to track if a username is taken
     mapping(string => bool) private usernameExists;
-    // Trusted forwarder for meta-transactions
-    address private trustedForwarder;
 
     event MessageSent(
         address indexed sender,
@@ -40,20 +38,17 @@ contract DeChat is ERC2771Context, Ownable {
 
     event UsernameSet(address indexed user, string username);
 
-    constructor(address _trustedForwarder) ERC2771Context(_trustedForwarder) {
-        trustedForwarder = _trustedForwarder;
+    constructor(address _trustedForwarder) 
+        ERC2771Context(_trustedForwarder)
+        Ownable(msg.sender) 
+    {}
+
+    function _msgSender() internal view virtual override(Context, ERC2771Context) returns (address) {
+        return ERC2771Context._msgSender();
     }
 
-    function setTrustedForwarder(address _trustedForwarder) external onlyOwner {
-        trustedForwarder = _trustedForwarder;
-    }
-
-    function _msgSender() internal view virtual override(ERC2771Context) returns (address) {
-        return super._msgSender();
-    }
-
-    function _msgData() internal view virtual override(ERC2771Context) returns (bytes calldata) {
-        return super._msgData();
+    function _msgData() internal view virtual override(Context, ERC2771Context) returns (bytes calldata) {
+        return ERC2771Context._msgData();
     }
 
     function sendMessage(address _recipient, string memory _content, bool _isImage, bool _isVoiceMessage) external {
