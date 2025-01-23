@@ -95,7 +95,8 @@ contract DeChat is ERC2771Context, Ownable {
         require(_recipient != address(0), "Invalid recipient address");
         require(msg.value > 0, "Must send some ETH");
 
-        address sender = _msgSender();
+        // For ETH transfers, we must use msg.sender as it involves real value transfer
+        address sender = msg.sender;
 
         Message memory newMessage = Message({
             sender: sender,
