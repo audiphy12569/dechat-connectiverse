@@ -58,8 +58,11 @@ contract DeChat is ERC2771Context, Ownable {
     function sendMessage(address _recipient, string memory _content, bool _isImage, bool _isVoiceMessage) external {
         require(_recipient != address(0), "Invalid recipient address");
         
+        // Use _msgSender() instead of msg.sender for meta-transactions
+        address sender = _msgSender();
+        
         Message memory newMessage = Message({
-            sender: _msgSender(),
+            sender: sender,
             recipient: _recipient,
             content: _content,
             timestamp: block.timestamp,
@@ -69,14 +72,14 @@ contract DeChat is ERC2771Context, Ownable {
             isVoiceMessage: _isVoiceMessage
         });
 
-        userMessages[_msgSender()].push(newMessage);
+        userMessages[sender].push(newMessage);
         userMessages[_recipient].push(newMessage);
 
-        _addToConversations(_msgSender(), _recipient);
-        _addToConversations(_recipient, _msgSender());
+        _addToConversations(sender, _recipient);
+        _addToConversations(_recipient, sender);
 
         emit MessageSent(
-            _msgSender(),
+            sender,
             _recipient,
             _content,
             block.timestamp,
@@ -87,12 +90,15 @@ contract DeChat is ERC2771Context, Ownable {
         );
     }
 
+    // ETH transfers will still require gas as they involve actual value transfer
     function sendEthWithMessage(address payable _recipient, string memory _content) external payable {
         require(_recipient != address(0), "Invalid recipient address");
         require(msg.value > 0, "Must send some ETH");
 
+        address sender = _msgSender();
+
         Message memory newMessage = Message({
-            sender: _msgSender(),
+            sender: sender,
             recipient: _recipient,
             content: _content,
             timestamp: block.timestamp,
@@ -102,17 +108,17 @@ contract DeChat is ERC2771Context, Ownable {
             isVoiceMessage: false
         });
 
-        userMessages[_msgSender()].push(newMessage);
+        userMessages[sender].push(newMessage);
         userMessages[_recipient].push(newMessage);
 
-        _addToConversations(_msgSender(), _recipient);
-        _addToConversations(_recipient, _msgSender());
+        _addToConversations(sender, _recipient);
+        _addToConversations(_recipient, sender);
 
         (bool sent, ) = _recipient.call{value: msg.value}("");
         require(sent, "Failed to send ETH");
 
         emit MessageSent(
-            _msgSender(),
+            sender,
             _recipient,
             _content,
             block.timestamp,

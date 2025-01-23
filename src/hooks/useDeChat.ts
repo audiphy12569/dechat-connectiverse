@@ -1,6 +1,7 @@
 import { useContractRead, useContractWrite, useAccount, useConfig } from 'wagmi'
 import { parseEther } from 'viem'
 import DeChatABI from '../contracts/DeChat.json'
+import { gaslessClient } from '../lib/web3'
 
 const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || '0x0000000000000000000000000000000000000000'
 
@@ -46,19 +47,18 @@ export function useDeChat() {
       if (!address) throw new Error('Wallet not connected')
       if (!recipient) throw new Error('Recipient address required')
       
+      // Use gasless client for message sending
       const tx = await sendMessageContract({
         abi: DeChatABI.abi,
         address: CONTRACT_ADDRESS as `0x${string}`,
         functionName: 'sendMessage',
-        args: [recipient, content, isImage],
+        args: [recipient, content, isImage, false],
         chain: config.chains[0],
         account: address,
       })
 
-      // Wait for transaction confirmation
       await tx
       
-      // Refetch the data after confirmation
       await Promise.all([refetchMessages(), refetchConversations()])
       
       return tx
@@ -68,6 +68,7 @@ export function useDeChat() {
     }
   }
 
+  // ETH transfers will still require gas
   const sendEthMessage = async (recipient: string, content: string, amount: string) => {
     try {
       if (!address) throw new Error('Wallet not connected')
@@ -83,10 +84,8 @@ export function useDeChat() {
         account: address,
       })
 
-      // Wait for transaction confirmation
       await tx
       
-      // Refetch the data after confirmation
       await Promise.all([refetchMessages(), refetchConversations()])
       
       return tx
