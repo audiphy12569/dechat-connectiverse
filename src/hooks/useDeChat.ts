@@ -48,12 +48,12 @@ export function useDeChat() {
       opengsn: {
         useGSN: true,
         forwarder: forwarderAddress,
+        preferredRelays: ['https://api.defender.openzeppelin.com/autotasks/'],
       }
     }
   })
 
   const { writeContractAsync: sendEthMessageContract } = useContractWrite({
-    // Note: ETH transfers will still require gas as they involve actual value transfer
     account: address,
     address: CONTRACT_ADDRESS as `0x${string}`,
     abi: DeChatABI.abi,
@@ -68,11 +68,11 @@ export function useDeChat() {
       console.log('Sending message with args:', { recipient, content, isImage })
       
       const tx = await sendMessageContract({
-        args: [recipient, content, isImage, false], // false for isVoiceMessage
+        args: [recipient, content, isImage, false],
         chain: config.chains[0],
       })
 
-      console.log('Transaction sent:', tx)
+      console.log('Transaction hash:', tx)
       
       await tx
       
