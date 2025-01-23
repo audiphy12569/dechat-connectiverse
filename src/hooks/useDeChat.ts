@@ -67,8 +67,18 @@ export function useDeChat() {
       
       console.log('Sending message with args:', { recipient, content, isImage })
       
+      // Ensure arguments are properly typed and ordered according to the contract
+      const args: [`0x${string}`, string, boolean, boolean] = [
+        recipient as `0x${string}`,
+        content,
+        isImage,
+        false // isVoiceMessage
+      ]
+
+      console.log('Formatted args:', args)
+      
       const tx = await sendMessageContract({
-        args: [recipient, content, isImage, false],
+        args,
         chain: config.chains[0],
       })
 
@@ -91,7 +101,7 @@ export function useDeChat() {
       if (!recipient) throw new Error('Recipient address required')
       
       const tx = await sendEthMessageContract({
-        args: [recipient, content],
+        args: [recipient as `0x${string}`, content],
         value: parseEther(amount),
         chain: config.chains[0],
       })
