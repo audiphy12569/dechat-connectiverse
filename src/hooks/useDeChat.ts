@@ -1,7 +1,7 @@
 import { useContractRead, useContractWrite, useAccount, useConfig } from 'wagmi'
 import { parseEther } from 'viem'
 import DeChatABI from '../contracts/DeChat.json'
-import { CONTRACT_ADDRESS, publicClient } from '../lib/web3'
+import { CONTRACT_ADDRESS, publicClient, forwarderAddress } from '../lib/web3'
 
 interface BlockchainMessage {
   sender: string;
@@ -37,22 +37,43 @@ export function useDeChat() {
     },
   })
 
-  const { writeContractAsync: sendMessageContract } = useContractWrite()
-  const { writeContractAsync: sendEthMessageContract } = useContractWrite()
+  const { writeContractAsync: sendMessageContract } = useContractWrite({
+    gas: 0n, // Set gas to 0 to use relayer
+    account: address,
+    address: CONTRACT_ADDRESS as `0x${string}`,
+    abi: DeChatABI.abi,
+    functionName: 'sendMessage',
+    // Add GSN configuration
+    meta: {
+      gasless: {
+        enabled: true,
+        provider: {
+          type: 'gsn',
+          config: {
+            paymasterAddress: forwarderAddress,
+            performDryRun: true,
+          },
+        },
+      },
+    },
+  })
+
+  const { writeContractAsync: sendEthMessageContract } = useContractWrite({
+    // Note: ETH transfers will still require gas as they involve actual value transfer
+    account: address,
+    address: CONTRACT_ADDRESS as `0x${string}`,
+    abi: DeChatABI.abi,
+    functionName: 'sendEthWithMessage',
+  })
 
   const sendTextMessage = async (recipient: string, content: string, isImage: boolean = false) => {
     try {
       if (!address) throw new Error('Wallet not connected')
       if (!recipient) throw new Error('Recipient address required')
       
-      // Use regular contract write for now until gasless is fully implemented
       const tx = await sendMessageContract({
-        abi: DeChatABI.abi,
-        address: CONTRACT_ADDRESS as `0x${string}`,
-        functionName: 'sendMessage',
         args: [recipient, content, isImage, false], // false for isVoiceMessage
         chain: config.chains[0],
-        account: address,
       })
 
       await tx
@@ -72,13 +93,9 @@ export function useDeChat() {
       if (!recipient) throw new Error('Recipient address required')
       
       const tx = await sendEthMessageContract({
-        abi: DeChatABI.abi,
-        address: CONTRACT_ADDRESS as `0x${string}`,
-        functionName: 'sendEthWithMessage',
         args: [recipient, content],
         value: parseEther(amount),
         chain: config.chains[0],
-        account: address,
       })
 
       await tx
