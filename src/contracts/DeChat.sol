@@ -51,14 +51,9 @@ contract DeChat is ERC2771Context, Ownable {
         return ERC2771Context._msgData();
     }
 
-    function _contextSuffixLength() internal view virtual override(Context, ERC2771Context) returns (uint256) {
-        return ERC2771Context._contextSuffixLength();
-    }
-
     function sendMessage(address _recipient, string memory _content, bool _isImage, bool _isVoiceMessage) external {
         require(_recipient != address(0), "Invalid recipient address");
         
-        // Use _msgSender() instead of msg.sender for meta-transactions
         address sender = _msgSender();
         
         Message memory newMessage = Message({
@@ -90,12 +85,11 @@ contract DeChat is ERC2771Context, Ownable {
         );
     }
 
-    // ETH transfers will still require gas as they involve actual value transfer
     function sendEthWithMessage(address payable _recipient, string memory _content) external payable {
         require(_recipient != address(0), "Invalid recipient address");
         require(msg.value > 0, "Must send some ETH");
 
-        // For ETH transfers, we must use msg.sender as it involves real value transfer
+        // ETH transfers must use msg.sender since they involve actual value transfer
         address sender = msg.sender;
 
         Message memory newMessage = Message({
@@ -135,15 +129,16 @@ contract DeChat is ERC2771Context, Ownable {
         require(bytes(_username).length <= 32, "Username too long");
         require(!usernameExists[_username], "Username already taken");
         
-        string memory oldUsername = usernames[_msgSender()];
+        address sender = _msgSender();
+        string memory oldUsername = usernames[sender];
         if (bytes(oldUsername).length > 0) {
             usernameExists[oldUsername] = false;
         }
         
-        usernames[_msgSender()] = _username;
+        usernames[sender] = _username;
         usernameExists[_username] = true;
         
-        emit UsernameSet(_msgSender(), _username);
+        emit UsernameSet(sender, _username);
     }
 
     function getUserMessages(address _user) external view returns (Message[] memory) {
