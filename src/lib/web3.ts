@@ -39,5 +39,3 @@ createWeb3Modal({
   defaultChain: sepolia,
   themeMode: 'dark'
 })
-
-export { CONTRACT_ADDRESS, forwarderAddress }

@@ -1,7 +1,7 @@
 import { useContractRead, useContractWrite, useAccount, useConfig } from 'wagmi'
 import { parseEther } from 'viem'
 import DeChatABI from '../contracts/DeChat.json'
-import { CONTRACT_ADDRESS, publicClient, forwarderAddress } from '../lib/web3'
+import { CONTRACT_ADDRESS, forwarderAddress } from '../lib/web3'
 
 interface BlockchainMessage {
   sender: string;
@@ -42,9 +42,13 @@ export function useDeChat() {
     abi: DeChatABI.abi,
     functionName: 'sendMessage',
     account: address,
-    // Configure for gasless transactions
     meta: {
+      gasless: true,
       trustedForwarder: forwarderAddress,
+      opengsn: {
+        useGSN: true,
+        forwarder: forwarderAddress,
+      }
     }
   })
 
